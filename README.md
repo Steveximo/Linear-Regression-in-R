@@ -1,4 +1,4 @@
-# Thesis-project-in-R
+
 # ABOUT THE PROJECT
   This project/repository contains part of the data set for my thesis project.It contains various variables(risk factors) attributed to blood pressure in adults.The records wer obtained from a database of a tertiary care hospital in India.
   
