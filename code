@@ -1,0 +1,124 @@
+# Importing data and loading packages
+birthweight <- rio::import(here::here("Birth_baby_weight.csv")) 
+ if(!require(pacman)) install.packages("pacman")
+pacman::p_load( gt,car, dplyr, lessR, ggplot2, magrittr, janitor, plotrix, broom,kableExtra )
+
+# Data manipulation
+ bweight <- birthweight %>% 
+    mutate(birthwt = bwt_ounce*0.02835,
+                       mheight = mheight_inches*0.0254,
+                       mweight = mweight_pounds*0.4536)
+ bweight <- bweight %>% 
+    select(Gender,birthwt, gestation_days,mother_age, mweight) %>%
+    filter(gestation_days > 200 & gestation_days < 350) 
+
+head(bweight,5) 
+
+any(is.na(bweight))
+
+ dim(bweight)
+
+ bweight$Gender <- as.factor(bweight$Gender)
+ 
+levels(bweight$Gender) <- c("male","female")
+
+ str(bweight)
+
+   
+# Descriptive statistics of the data
+ summary(bweight)
+
+ table1 <- table(bweight$Gender)
+
+ piepercent <-paste0(round(100 * table1/sum(table1)), "%")
+
+plotrix::pie3D(table1,radius = 1.5,
+                                 explode = 0.25,
+                                 labels = piepercent,
+                                  col = c("purple","orange"),
+                                  main = "Births according to sex  ",
+                                  col.main="blue")
+ legend("topright",
+                c("males","females"),
+                cex = 0.8,
+                fill =c("purple","orange") )
+
+
+ table2 <- table(bweight$smoking_status)
+
+ barplot(table2,
+                    main ="Mother's smoking status",
+                    ylab = "Number of mothers",
+                    col.main = "blue",
+                    col.lab = "darkblue",
+                    col = c("lightgreen","red") )
+
+# Correlation and Linear regression analysis
+ ggplot(data = bweight,
+                  mapping=aes(x=gestation_days,
+                                                   y=birthwt))+
+   geom_point(col='green',
+                 +              size=2)+
+   geom_smooth(method='lm',
+                  +               col= 'blue')+
+   labs(title="Baby's birth weight Vs Gestation period",
+                  x="Gestation period",
+                  y="Birth Weight")
+
+  cor.test(bweight$birthwt,
+                      bweight$gestation_days,method = "pearson")
+
+ # fitting a simple linear model
+model1 <- lm(bweight$birthwt~bweight$gestation_days)
+ summary(model1)
+hist(residuals(model1))
+ ggplot(data = bweight,
+      mapping=aes(x=mweight,
+                  y=birthwt))+
+  geom_point(col='green',
+             size=2)+
+  labs(title="Baby's birth weight Vs mother weight",
+       x="Mother's weight",
+       y="Birth Weight")
+
+cor.test(bweight$birthwt,
+         bweight$mweight,method = "pearson")
+
+	
+ model2 <- lm(bweight$birthwt~bweight$mweight)
+
+ summary(model2)
+
+plot(bweight$birthwt,residuals(model2))
+ hist(residuals(model2))
+
+cor.test(bweight$birthwt,
+                      bweight$mweight,method = "pearson")
+
+shapiro.test(bweight$birthwt)
+
+car::leveneTest(bweight$birthwt ~ bweight$Gender)
+    
+ 
+ t.test(data = bweight, birthwt ~ Gender,
+                 alt = "two.sided", var.eq = T)
+
+
+
+
+ boxplot(birthwt ~ Gender, data = bweight,
+                    main="BOX PLOT OF BIRTH WEIGHT BY GENDER",
+                         ylab = "Birth weight(kg)")
+
+# Fitting a multiple linear regression model
+ model3 <- lm(birthwt ~ mweight + gestation_days,
+             data = bweight)
+summary(model3)
+
+ model <- lm(birthwt ~ mweight + gestation_days + Gender,
+             data = bweight)
+ summary(model)
+
+
+ 
+ 
